@@ -4,8 +4,7 @@
 <%
 	request.setCharacterEncoding("UTF-8");
 	String check = request.getParameter("check");
-	String door = request.getParameter("door");
 	DBConnector connectDB = DBConnector.getInstance();
-	String returns = connectDB.doorStatusUpdate(check, door);
+	String returns = connectDB.lightTurnOnOffArduino(check);
 	out.print(returns);
 %>

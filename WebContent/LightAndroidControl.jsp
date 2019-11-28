@@ -4,8 +4,8 @@
 <%
 	request.setCharacterEncoding("UTF-8");
 	String check = request.getParameter("check");
-	String door = request.getParameter("door");
+	String light = request.getParameter("light");
 	DBConnector connectDB = DBConnector.getInstance();
-	String returns = connectDB.doorStatusUpdate(check, door);
+	String returns = connectDB.lightTurnOnOffAndroid(check, light);
 	out.print(returns);
 %>

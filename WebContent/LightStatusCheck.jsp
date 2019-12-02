@@ -4,8 +4,8 @@
 <%
 	request.setCharacterEncoding("UTF-8");
 	String androidCheck = request.getParameter("check");
-	DoorStatus doorStatus = DoorStatus.getInstance();
-	String returns = doorStatus.doorStatusCheck(androidCheck);
+	LightStatus lightStatus = LightStatus.getInstance();
+	String returns = lightStatus.lightStatusCheck(androidCheck);
 	if(returns.equals("1")) {
 		out.clear();
 		out.print("open");

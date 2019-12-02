@@ -5,7 +5,7 @@
 	request.setCharacterEncoding("UTF-8");
 	String check = request.getParameter("check");
 	String light = request.getParameter("light");
-	DBConnector connectDB = DBConnector.getInstance();
-	String returns = connectDB.lightTurnOnOffAndroid(check, light);
+	LightControl lightControl = LightControl.getInstance();
+	String returns = lightControl.lightTurnOnOffAndroid(check, light);
 	out.print(returns);
 %>

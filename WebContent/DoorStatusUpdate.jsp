@@ -5,7 +5,7 @@
 	request.setCharacterEncoding("UTF-8");
 	String check = request.getParameter("check");
 	String door = request.getParameter("door");
-	DBConnector connectDB = DBConnector.getInstance();
-	String returns = connectDB.doorStatusUpdate(check, door);
+	DoorStatus doorStatus = DoorStatus.getInstance();
+	String returns = doorStatus.doorStatusUpdate(check, door);
 	out.print(returns);
 %>

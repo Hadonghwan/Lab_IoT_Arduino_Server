@@ -6,22 +6,31 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import kr.re.nsr.crypto.symm.LEA;
+import kr.re.nsr.crypto.BlockCipher.Mode;
+import kr.re.nsr.crypto.BlockCipherMode;
+import kr.re.nsr.crypto.BlockCipherModeAE;
+import kr.re.nsr.crypto.Mac;
+
 public class DoorStatus {
-private static DoorStatus instance = new DoorStatus();
+	public DoorStatus() {}
 	
-	public static DoorStatus getInstance() {
-		return instance;
-	}
-	
-	private DBConnector dbc = DBConnector.getInstance();
+	private DBConnector dbc = new DBConnector();
 	private Connection conn;    //  connecttion:db에 접근하게 해주는 객체
 	private PreparedStatement pstmt;    //  db에 sql문을 전달하는 객체
 	private String sql;    //  sql 쿼리를 저장하기 위한 변수
 	private ResultSet rs;    //  db에서 sql쿼리를 실행한 결과를 가져오는 객체
 	private String returns;    //  db 연결결과를 return하는 변수
 	
+	private BlockCipherMode cipher = new LEA.ECB();
+	private byte[] key = "security".getBytes();
+	private byte[] ct;
+	
 	public String doorStatusUpdate(String check, String st) {    //  아두이노에서 문 상태 업데이트
-		if(check.equals("security")) {
+		cipher.init(Mode.ENCRYPT, key);
+		ct = cipher.doFinal(check.getBytes());
+		System.out.println(ct);
+		if(dbc.checkString(check)) {
 			try {
 				Class.forName("com.mysql.cj.jdbc.Driver");
 				conn = DriverManager.getConnection(dbc.getURL(), dbc.getID(), dbc.getPassword());    //  DB와 연결
@@ -30,8 +39,11 @@ private static DoorStatus instance = new DoorStatus();
 				pstmt.setString(1, st);    //  sql문에 ?를 st로 변환
 				pstmt.executeUpdate();    //  db에 쿼리문 날리기
 				returns = "ok";    //  db에 올바르게 업뎃하면 ok return
-			} catch(Exception e) {    //  error
-				e.printStackTrace();
+			} catch (SQLException e) {
+				System.err.println("BbsDAO SQLException error");
+				returns = "error";
+			} catch (ClassNotFoundException e) {
+				System.err.println("BbsDAO ClassNotFoundException error");
 				returns = "error";
 			} finally {    //  db접속이 끝나면 초기화 및 닫아주기
 				if (pstmt != null)try {pstmt.close();} catch (SQLException ex) {}
@@ -42,9 +54,9 @@ private static DoorStatus instance = new DoorStatus();
 			returns="no Arduino";
 		return returns;
 	}
-	
+
 	public String doorStatusCheck(String androidCheck) {    //  안드로이드에서 문상태 확인
-		if(androidCheck.equals("security")) {
+		if(dbc.checkString(androidCheck)) {
 			try {
 				Class.forName("com.mysql.cj.jdbc.Driver");
 				conn = DriverManager.getConnection(dbc.getURL(), dbc.getID(), dbc.getPassword());

@@ -5,7 +5,7 @@
 	request.setCharacterEncoding("UTF-8");
 	String check = request.getParameter("check");
 	String light = request.getParameter("light");
-	LightControl lightControl = LightControl.getInstance();
+	LightControl lightControl = new LightControl();
 	String returns = lightControl.lightTurnOnOffAndroid(check, light);
 	out.print(returns);
 %>

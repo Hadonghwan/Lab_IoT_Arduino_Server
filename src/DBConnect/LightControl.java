@@ -7,23 +7,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class LightControl {
-	private static LightControl instance = new LightControl();
-	
-	public static LightControl getInstance() {
-		return instance;
-	}
-	
 	public LightControl() {}
 	
-	DBConnector dbc = DBConnector.getInstance();
+	private DBConnector dbc;
 	private Connection conn;    //  connecttion:db에 접근하게 해주는 객체
 	private PreparedStatement pstmt;    //  db에 sql문을 전달하는 객체
 	private String sql;    //  sql 쿼리를 저장하기 위한 변수
 	private ResultSet rs;    //  db에서 sql쿼리를 실행한 결과를 가져오는 객체
-	private String returns;    //  db 연결결과를 return하는 변수	
+	private String returns;    //  db 연결결과를 return하는 변수
 	
 	public String lightTurnOnOffAndroid(String androidCheck, String control) {    //  안드로이드에서 Light turn on-off
-		if(androidCheck.equals("security")) {
+		if(dbc.checkString(androidCheck)) {
 			try {
 				Class.forName("com.mysql.cj.jdbc.Driver");
 				conn = DriverManager.getConnection(dbc.getURL(), dbc.getID(), dbc.getPassword());
@@ -46,7 +40,7 @@ public class LightControl {
 	}
 	
 	public String lightTurnOnOffArduino(String check) {    //  아두이노에서 Light turn on-off
-		if(check.equals("security")) {
+		if(dbc.checkString(check)) {
 			try {
 				Class.forName("com.mysql.cj.jdbc.Driver");
 				conn = DriverManager.getConnection(dbc.getURL(), dbc.getID(), dbc.getPassword());

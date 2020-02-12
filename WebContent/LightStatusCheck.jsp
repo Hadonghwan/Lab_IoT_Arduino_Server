@@ -4,16 +4,16 @@
 <%
 	request.setCharacterEncoding("UTF-8");
 	String androidCheck = request.getParameter("check");
-	LightStatus lightStatus = LightStatus.getInstance();
+	LightStatus lightStatus = new LightStatus();
 	String returns = lightStatus.lightStatusCheck(androidCheck);
 	if(returns.equals("1")) {
 		out.clear();
-		out.print("open");
+		out.print("TurnOn");
 		out.flush();
 	}
 	else if(returns.equals("0")) {
 		out.clear();
-		out.print("close");
+		out.print("TurnOff");
 		out.flush();
 	}
 	else {

@@ -5,7 +5,7 @@
 	request.setCharacterEncoding("UTF-8");
 	String check = request.getParameter("check");
 	String door = request.getParameter("door");
-	DoorStatus doorStatus = DoorStatus.getInstance();
+	DoorStatus doorStatus = new DoorStatus();
 	String returns = doorStatus.doorStatusUpdate(check, door);
 	out.print(returns);
 %>

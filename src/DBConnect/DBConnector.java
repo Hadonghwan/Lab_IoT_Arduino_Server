@@ -16,13 +16,13 @@ import javax.crypto.NoSuchPaddingException;
 
 import Security.AESDec;
 
-import kr.re.nsr.crypto.*;
 import kr.re.nsr.crypto.BlockCipher.Mode;
+import kr.re.nsr.crypto.BlockCipherMode;
 import kr.re.nsr.crypto.symm.LEA;
 
 public class DBConnector {
 	
-	//  암호화 필요 변수
+	//  DB 암호화 필요 변수
 	private AESDec aes;
 	private String propFile;
 	private Properties prop;
@@ -47,7 +47,7 @@ public class DBConnector {
 	public DBConnector() {
 		try {
 			//  내부 암호화 	DB password read
-			propFile = "C:/Users/SECURITY/eclipse-workspace/IoT/src/Security/key.properties";
+			propFile = "/src/Security/key.properties";
 			prop = new Properties();
 			fis = new FileInputStream(propFile);
 			prop.load(new BufferedInputStream(fis));
@@ -104,7 +104,7 @@ public class DBConnector {
 	public byte[] get_Lea() {
 		try {
 			prop_lea = new Properties();
-			prop_lea.load(new BufferedInputStream(new FileInputStream("/WEB-INF/lea_key.properties")));
+			prop_lea.load(new BufferedInputStream(new FileInputStream("/WebContent/WEB-INF/lea_key.properties")));
 			lea_key = prop_lea.getProperty("key").getBytes();
 			lea = new byte[16];
 			System.arraycopy(lea_key, 0, lea, 0, lea_key.length);
@@ -119,7 +119,8 @@ public class DBConnector {
 	
 	public boolean checkString(String st) {
 		cipher.init(Mode.DECRYPT, get_Lea(), roundkey);
-		if("security".equals(new String(cipher.doFinal(hexStringToByteArray(st))))) return true;
+		String check = new String(cipher.doFinal(hexStringToByteArray(st)));
+		if("security".equals(check.trim())) return true;
 		else return false;
 	}
 	

@@ -6,12 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import kr.re.nsr.crypto.symm.LEA;
-import kr.re.nsr.crypto.BlockCipher.Mode;
-import kr.re.nsr.crypto.BlockCipherMode;
-import kr.re.nsr.crypto.BlockCipherModeAE;
-import kr.re.nsr.crypto.Mac;
-
 public class DoorStatus {
 	public DoorStatus() {}
 	
@@ -22,14 +16,7 @@ public class DoorStatus {
 	private ResultSet rs;    //  db에서 sql쿼리를 실행한 결과를 가져오는 객체
 	private String returns;    //  db 연결결과를 return하는 변수
 	
-	private BlockCipherMode cipher = new LEA.ECB();
-	private byte[] key = "security".getBytes();
-	private byte[] ct;
-	
 	public String doorStatusUpdate(String check, String st) {    //  아두이노에서 문 상태 업데이트
-		cipher.init(Mode.ENCRYPT, key);
-		ct = cipher.doFinal(check.getBytes());
-		System.out.println(ct);
 		if(dbc.checkString(check)) {
 			try {
 				Class.forName("com.mysql.cj.jdbc.Driver");

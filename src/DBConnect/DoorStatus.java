@@ -23,7 +23,7 @@ public class DoorStatus {
 				conn = DriverManager.getConnection(dbc.getURL(), dbc.getID(), dbc.getPassword());    //  DB와 연결
 				sql = "update iot set door=?";    //  door 상태 업데이트 시키는 쿼리문
 				pstmt = conn.prepareStatement(sql);    //  db와 접근하기 위한 쿼리 저장
-				pstmt.setString(1, st);    //  sql문에 ?를 st로 변환
+				pstmt.setString(1, dbc.decryptoString(st));    //  sql문에 ?를 st로 변환
 				pstmt.executeUpdate();    //  db에 쿼리문 날리기
 				returns = "ok";    //  db에 올바르게 업뎃하면 ok return
 			} catch (SQLException e) {

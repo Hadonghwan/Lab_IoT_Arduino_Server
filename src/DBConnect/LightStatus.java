@@ -23,7 +23,7 @@ public class LightStatus {
 				conn = DriverManager.getConnection(dbc.getURL(), dbc.getID(), dbc.getPassword());
 				sql = "update iot set light=?";
 				pstmt = conn.prepareStatement(sql);    //  db와 접근하기 위한 쿼리 저장
-				pstmt.setString(1, st);    //  sql문에 ?를 st로 변환
+				pstmt.setString(1, dbc.decryptoString(st));    //  sql문에 ?를 st로 변환
 				pstmt.executeUpdate();    //  db에 쿼리문 날리기
 				returns = "ok";
 			} catch(Exception e) {

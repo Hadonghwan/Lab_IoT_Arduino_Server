@@ -117,10 +117,14 @@ public class DBConnector {
 		return lea;
 	}
 	
-	public boolean checkString(String st) {
+	public String decryptoString(String st) {
 		cipher.init(Mode.DECRYPT, get_Lea(), roundkey);
 		String check = new String(cipher.doFinal(hexStringToByteArray(st)));
-		if("security".equals(check.trim())) return true;
+		return check.trim();
+	}
+	
+	public boolean checkString(String st) {
+		if("security".equals(decryptoString(st))) return true;
 		else return false;
 	}
 	

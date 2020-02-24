@@ -6,6 +6,6 @@
 	String check = request.getParameter("check");
 	String light = request.getParameter("light");
 	LightControl lightControl = new LightControl();
-	String returns = lightControl.lightTurnOnOffAndroid(check, light);
+	String returns = lightControl.lightControlAndroid(check, light);
 	out.print(returns);
 %>

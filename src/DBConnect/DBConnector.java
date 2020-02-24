@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.io.BufferedInputStream;
 import java.util.Properties;
 
@@ -24,16 +27,15 @@ public class DBConnector {
 	
 	//  DB 암호화 필요 변수
 	private AESDec aes;
-	private String propFile;
 	private Properties prop;
-	private FileInputStream fis;
-	private String read_key;
+	private FileInputStream fis_prop;
 	private Properties key;
 	private FileInputStream fis_key;
 	private String aes_key;
 	
 	//  Lea 암호
 	private Properties prop_lea;
+	private FileInputStream fis_lea;
 	private BlockCipherMode cipher = new LEA.CBC();
 	private byte[] roundkey = { 0x0, };
 	private byte[] lea_key;
@@ -47,15 +49,13 @@ public class DBConnector {
 	public DBConnector() {
 		try {
 			//  내부 암호화 	DB password read
-			propFile = "/src/Security/key.properties";
 			prop = new Properties();
-			fis = new FileInputStream(propFile);
-			prop.load(new BufferedInputStream(fis));
+			fis_prop = new FileInputStream("/src/Security/key.properties");
+			prop.load(new BufferedInputStream(fis_prop));
 
 			//외부에 저장된 비밀키 read
-			read_key = "C:/Users/SECURITY/Key/key.properties";
 			key = new Properties();
-			fis_key = new FileInputStream(read_key);
+			fis_key = new FileInputStream("C:/Users/SECURITY/Key/key.properties");
 			key.load(new BufferedInputStream(fis_key));
 
 			aes_key = key.getProperty("key");
@@ -64,55 +64,63 @@ public class DBConnector {
 
 			if(aes != null)
 				dbPassword = aes.aesDecode(prop.getProperty("password"));
-			if(fis != null) {
-				fis.close();
-			}
-			if(fis_key != null) {
-				fis_key.close();
-			}
 		} catch (FileNotFoundException e) { //예외처리 ,대응부재 제거
-			System.err.println("BbsDAO FileNotFoundException error");	
+			System.err.println("DBConnector FileNotFoundException error");	
 		} catch (IOException e) {
-			System.err.println("BbsDAO IOException error");
+			System.err.println("DBConnector IOException error");
 		} catch (InvalidKeyException e) {
-			System.err.println("BbsDAO InvalidKeyException error");
+			System.err.println("DBConnector InvalidKeyException error");
 		} catch (NoSuchAlgorithmException e) {
-			System.err.println("BbsDAO NoSuchAlgorithmException error");
+			System.err.println("DBConnector NoSuchAlgorithmException error");
 		} catch (NoSuchPaddingException e) {
-			System.err.println("BbsDAO NoSuchPaddingException error");
+			System.err.println("DBConnector NoSuchPaddingException error");
 		} catch (InvalidAlgorithmParameterException e) {
-			System.err.println("BbsDAO InvalidAlgorithmParameterException error");
+			System.err.println("DBConnector InvalidAlgorithmParameterException error");
 		} catch (IllegalBlockSizeException e) {
-			System.err.println("BbsDAO IllegalBlockSizeException error");
+			System.err.println("DBConnector IllegalBlockSizeException error");
 		} catch (BadPaddingException e) {
-			System.err.println("BbsDAO BadPaddingException error");
+			System.err.println("DBConnector BadPaddingException error");
+		} finally {
+			try {
+				if(fis_prop != null)
+					fis_prop.close();
+				if(fis_key != null)
+					fis_key.close();
+			} catch (IOException e) {
+				System.err.println("DBConnector close IOException error");
+			}
 		}
 	}
 	
-	public String getURL() {
-		return dbURL;
+	public Connection getConn() {
+		try {
+			return DriverManager.getConnection(dbURL, dbId, dbPassword);
+		} catch (SQLException e) {
+			System.err.println("DBConnector Connection SQLException error");
+			return null;
+		}
 	}
 	
-	public String getID() {
-		return dbId;
-	}
-	
-	public String getPassword() {
-		return dbPassword;
-	}
-	
-	public byte[] get_Lea() {
+	private byte[] get_Lea() {
 		try {
 			prop_lea = new Properties();
-			prop_lea.load(new BufferedInputStream(new FileInputStream("/WebContent/WEB-INF/lea_key.properties")));
+			fis_lea = new FileInputStream("/WebContent/WEB-INF/lea_key.properties");
+			prop_lea.load(new BufferedInputStream(fis_lea));
 			lea_key = prop_lea.getProperty("key").getBytes();
 			lea = new byte[16];
 			System.arraycopy(lea_key, 0, lea, 0, lea_key.length);
 
 		} catch (FileNotFoundException e) { //예외처리 ,대응부재 제거
-			System.err.println("BbsDAO FileNotFoundException error");	
+			System.err.println("DBConnector FileNotFoundException error");	
 		} catch (IOException e) {
-			System.err.println("BbsDAO IOException error");
+			System.err.println("DBConnector IOException error");
+		} finally {
+			try {
+				if(fis_lea != null)
+					fis_lea.close();
+			} catch (IOException e) {
+				System.err.println("DBConnector close IOException error");
+			}
 		}
 		return lea;
 	}

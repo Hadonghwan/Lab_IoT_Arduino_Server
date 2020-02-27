@@ -4,6 +4,15 @@
 <%
 	request.setCharacterEncoding("UTF-8");
 	String androidCheck = request.getParameter("check");
+	if(androidCheck != null) {
+		androidCheck = androidCheck.replaceAll("<", "&li;");
+		androidCheck = androidCheck.replaceAll(">", "&gt;");
+		androidCheck = androidCheck.replaceAll("&", "&amp;");
+		androidCheck = androidCheck.replaceAll("\'\"", "&quot;");
+	}
+	else {
+		androidCheck = "";
+	}
 	DoorStatus doorStatus = new DoorStatus();
 	String returns = doorStatus.doorStatusCheck(androidCheck);
 	if(returns.equals("1")) {

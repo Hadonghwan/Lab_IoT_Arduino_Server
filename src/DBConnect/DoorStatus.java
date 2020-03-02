@@ -21,7 +21,6 @@ public class DoorStatus {
 	public String doorStatusUpdate(String check, String value) {    //  아두이노에서 문 상태 업데이트
 		if(dbc.arduinoCheck(check)) {    //  아두이노 접근이 맞는지 확인
 			try {
-				Class.forName("com.mysql.cj.jdbc.Driver");
 				sql = "update iot set door=?";    //  door 상태 업데이트 시키는 쿼리문
 				pstmt = conn.prepareStatement(sql);    //  db에 접근하기 위한 쿼리 저장
 				pstmt.setString(1, dbc.decryptoString(value));    //  sql문에 ?를 복호화된 st로 변환
@@ -30,9 +29,6 @@ public class DoorStatus {
 			} catch (SQLException e) {    //  예외 처리
 				System.err.println("DoorStatus Update SQLException error");
 				returns = "SQLError";
-			} catch (ClassNotFoundException e) {
-				System.err.println("DoorStatus Update ClassNotFoundException error");
-				returns = "ClassError";
 			} finally {    //  db접속이 끝나면 초기화 및 닫아주기
 				try {
 					if (pstmt != null) {
@@ -49,16 +45,21 @@ public class DoorStatus {
 		return returns;
 	}
 
-	public String doorStatusCheck(String androidCheck) {    //  안드로이드에서 문상태 확인
-		if(androidCheck.equals("security")) {    //  안드로이드 접근이 맞는지 확인
+	public String doorStatusCheck(String check) {    //  안드로이드에서 문상태 확인
+		if(check.equals("security")) {    //  안드로이드 접근이 맞는지 확인
 			try {
-				Class.forName("com.mysql.cj.jdbc.Driver");
 				sql = "select door from iot";    //  door 상태 체크하는 쿼리문
 				pstmt = conn.prepareStatement(sql);    //  db에 접근하기 위한 쿼리 저장
 				rs = pstmt.executeQuery();    //  db에 쿼리문 날리기
 				//  db에서 쿼리문 날리고 얻은 결과값 가져오기
 				if(rs.next()) {    //  결과값 있으면 결과값 return
-					returns = rs.getString("door");
+					String value;
+					value = rs.getString("door");
+					if(value.equals("1")) {
+						returns = "open";
+					} else if(value.equals("0")) {
+						returns = "close";
+					}
 				}
 				else {    //  결과값 없으면 no return
 					returns = "no";
@@ -66,9 +67,6 @@ public class DoorStatus {
 			} catch (SQLException e) {    //  예외 처리
 				System.err.println("DoorStatus Check SQLException error");
 				returns = "SQLError";
-			} catch (ClassNotFoundException e) {
-				System.err.println("DoorStatus Check ClassNotFoundException error");
-				returns = "ClassError";
 			} finally {    //  db접속이 끝나면 초기화 및 닫아주기
 				try {
 					if (rs != null) {

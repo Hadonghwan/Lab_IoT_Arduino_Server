@@ -1,24 +1,21 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import = "DBConnect.LightStatus" %>
+<%@ page import = "Security.XSS" %>
 <%
 	request.setCharacterEncoding("UTF-8");
 	String check = request.getParameter("check");
 	String light = request.getParameter("light");
 	if(check != null) {
-		check = check.replaceAll("<", "&li;");
-		check = check.replaceAll(">", "&gt;");
-		check = check.replaceAll("&", "&amp;");
-		check = check.replaceAll("\'\"", "&quot;");
+		XSS xss = new XSS();
+		check = xss.prevention(check);
 	}
 	else {
 		check = "";
 	}
 	if(light != null) {
-		light = light.replaceAll("<", "&li;");
-		light = light.replaceAll(">", "&gt;");
-		light = light.replaceAll("&", "&amp;");
-		light = light.replaceAll("\'\"", "&quot;");
+		XSS xss = new XSS();
+		light = xss.prevention(light);
 	}
 	else {
 		light = "";

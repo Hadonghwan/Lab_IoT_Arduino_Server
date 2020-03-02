@@ -18,10 +18,9 @@ public class LightControl {
 		conn = dbc.getConn();    //  connection 생성 및 db 연결
 	}
 	
-	public String lightControlAndroid(String androidCheck, String control) {    //  안드로이드에서 Light turn on-off
-		if(androidCheck.equals("security")) {    //  안드로이드 접근이 맞는지 확인
+	public String lightControlAndroid(String check, String control) {    //  안드로이드에서 Light turn on-off
+		if(check.equals("security")) {    //  안드로이드 접근이 맞는지 확인
 			try {
-				Class.forName("com.mysql.cj.jdbc.Driver");
 				sql = "update iot set light=?";    //  Light Control 업데이트 하는 쿼리문
 				pstmt = conn.prepareStatement(sql);    //  db에 접근하기 위한 퀴리 저장
 				pstmt.setString(1, control);    //  sql문 ?를 control로 저장
@@ -30,9 +29,6 @@ public class LightControl {
 			} catch (SQLException e) {    //  예외 처리
 				System.err.println("LightControl Android SQLException error");
 				returns = "SQLError";
-			} catch (ClassNotFoundException e) {
-				System.err.println("LightControl Android ClassNotFoundException error");
-				returns = "ClassError";
 			} finally {    //  db접속이 끝나면 초기화 및 닫아주기
 				try {
 					if(pstmt != null) {
@@ -52,13 +48,19 @@ public class LightControl {
 	public String lightControlArduino(String check) {    //  아두이노에서 Light turn on-off
 		if(dbc.arduinoCheck(check)) {    //  아두이노 접근이 맞는지 확인
 			try {
-				Class.forName("com.mysql.cj.jdbc.Driver");
 				sql = "select light from iot";    //  Light Control 확인 하는 쿼리문
 				pstmt = conn.prepareStatement(sql);    //  db에 접근하기 위한 쿼리 저장
 				rs = pstmt.executeQuery();    //  db에 쿼리 날리기
 				//  db에서 쿼리문 날리고 얻은 결과값 가져오기
 				if(rs.next()) {
-					returns = rs.getString("light");
+					String value;
+					value = rs.getString("light");
+					if(value.equals("1")) {
+						returns = "on";
+					}
+					else if(value.equals("0")) {
+						returns = "off";
+					}
 				}
 				else {    //  결과값이 없으면 no return
 					returns = "no";
@@ -66,9 +68,6 @@ public class LightControl {
 			} catch (SQLException e) {    //  예외 처리
 				System.err.println("LightControl Arduino SQLException error");
 				returns = "SQLError";
-			} catch (ClassNotFoundException e) {
-				System.err.println("LightControl Arduino ClassNotFoundException error");
-				returns = "ClassError";
 			} finally {    //  db접속이 끝나면 초기화 및 닫아주기
 				try {
 					if(rs != null) {

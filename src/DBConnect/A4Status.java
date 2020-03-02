@@ -21,7 +21,6 @@ public class A4Status {
 	public String a4StatusUpdate(String check, String value) {    //  아두이노에서 A4 상태 업데이트
 		if(dbc.arduinoCheck(check)) {    //  아두이노 접근이 맞는지 확인
 			try {
-				Class.forName("com.mysql.cj.jdbc.Driver");
 				sql = "update iot set A4=?";    //  A4 상태 업데이트 시키는 쿼리문
 				pstmt = conn.prepareStatement(sql);    //  db에 접근하기 위한 쿼리 저장
 				pstmt.setString(1, dbc.decryptoString(value));    //  sql문에 ?를 복호화된 st로 변환
@@ -30,9 +29,6 @@ public class A4Status {
 			}catch (SQLException e) {    //  예외 처리
 				System.err.println("A4Status Update SQLException error");
 				returns = "SQLError";
-			} catch (ClassNotFoundException e) {
-				System.err.println("A4Status Update ClassNotFoundException error");
-				returns = "ClassError";
 			} finally {    //  db접속이 끝나면 초기화 및 닫아주기
 				try {
 					if(pstmt != null) {
@@ -49,16 +45,21 @@ public class A4Status {
 		return returns;
 	}
 	
-	public String a4StatusCheck(String androidCheck) {    //  안드로이드에서 A4 상태 확인
-		if(androidCheck.equals("serucity")) {    //  안드로이드 접근이 맞는지 확인
+	public String a4StatusCheck(String check) {    //  안드로이드에서 A4 상태 확인
+		if(check.equals("serucity")) {    //  안드로이드 접근이 맞는지 확인
 			try {
-				Class.forName("com.mysql.cj.jdbc.Driver");
 				sql = "select A4 from iot";    //  A4 상태 체크하는 쿼리문
 				pstmt = conn.prepareStatement(sql);    //  db에 접근하기 위한 쿼리 저장
 				rs = pstmt.executeQuery();    //  db에 쿼리문 날리기
 				//  db에서 쿼리문 날리고 얻은 결과값 가져오기
 				if(rs.next()) {    //  결과값 있으면 결과값 return
-					returns = rs.getString("A4");
+					String value;
+					value = rs.getString("A4");
+					if(value.equals("1")) {
+						returns = "enough";
+					} else if(value.equals("0")) {
+						returns = "lack";
+					}
 				}
 				else {    //  결과값 없으면 no return
 					returns = "no";
@@ -66,9 +67,6 @@ public class A4Status {
 			} catch (SQLException e) {    //  예외 처리
 				System.err.println("A4Status Check SQLException error");
 				returns = "SQLError";
-			} catch (ClassNotFoundException e) {
-				System.err.println("A4Status Check ClassNotFoundException error");
-				returns = "ClassError";
 			} finally {    //  db접속이 끝나면 초기화 및 닫아주기
 				try {
 					if(rs != null) {

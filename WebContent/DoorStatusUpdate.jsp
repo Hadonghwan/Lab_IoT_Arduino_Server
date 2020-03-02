@@ -1,24 +1,21 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import = "DBConnect.DoorStatus" %>
+<%@ page import = "Security.XSS" %>
 <%
 	request.setCharacterEncoding("UTF-8");
 	String check = request.getParameter("check");
 	String door = request.getParameter("door");
 	if(check != null) {
-		check = check.replaceAll("<", "&li;");
-		check = check.replaceAll(">", "&gt;");
-		check = check.replaceAll("&", "&amp;");
-		check = check.replaceAll("\'\"", "&quot;");
+		XSS xss = new XSS();
+		check = xss.prevention(check);
 	}
 	else {
 		check = "";
 	}
 	if(door != null) {
-		door = door.replaceAll("<", "&li;");
-		door = door.replaceAll(">", "&gt;");
-		door = door.replaceAll("&", "&amp;");
-		door = door.replaceAll("\'\"", "&quot;");
+		XSS xss = new XSS();
+		door = xss.prevention(door);
 	}
 	else {
 		door = "";

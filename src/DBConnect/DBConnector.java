@@ -25,12 +25,10 @@ import kr.re.nsr.crypto.symm.LEA;
 public class DBConnector {
 	
 	//  DB 암호화 필요 변수
-	private AESDec aes;
 	private Properties prop;
 	private FileInputStream fis_prop;
 	private Properties key;
 	private FileInputStream fis_key;
-	private String aes_key;
 	
 	//  Lea 암호
 	private Properties prop_lea;
@@ -41,7 +39,7 @@ public class DBConnector {
 	private byte[] lea;
 	
 	//DB 접속
-	private String dbURL = "jdbc:mysql://localhost:3306/securitylab_iot?serverTimezone=UTC";    //  localhost:3306은 DB 포트
+	private String dbURL = "jdbc:mariadb://localhost:3306/securitylab_iot?serverTimezone=UTC";    //  localhost:3306은 DB 포트
 	private String dbId = "root";    //  db 아이디(기본 최고 권한자 root)
 	private String dbPassword = "";    //  db 비밀번호
 	
@@ -56,15 +54,8 @@ public class DBConnector {
 			key = new Properties();
 			fis_key = new FileInputStream("C:/Users/SECURITY/Key/key.properties");
 			key.load(new BufferedInputStream(fis_key));
-
-			aes_key = key.getProperty("key");
 			
-			if(aes_key != null) {
-				aes = new AESDec(aes_key);
-			}
-			if(aes != null) {
-				dbPassword = aes.aesDecode(prop.getProperty("password"));
-			}
+			dbPassword = AESDec.aesDecryption(prop.getProperty("password"), key.getProperty("key"));
 		} catch (FileNotFoundException e) { //예외처리 ,대응부재 제거
 			System.err.println("DBConnector FileNotFoundException error");	
 		} catch (IOException e) {

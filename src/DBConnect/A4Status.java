@@ -1,9 +1,20 @@
 package DBConnect;
 
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
+import Security.AESDec;
+import Security.Crypto;
 
 public class A4Status {
 	private DBConnector dbc;
@@ -13,15 +24,18 @@ public class A4Status {
 	private ResultSet rs;    //  db에서 sql쿼리를 실행한 결과를 가져오는 객체
 	private String returns;    //  db 연결결과를 return하는 변수
 	
+	private Crypto crypto;
+	
 	public A4Status() {
 		dbc = new DBConnector();    //  DBConnector 객체 생성
 		conn = dbc.getConn();    //  connection 생성 및 db 연결
+		crypto = new Crypto();
 	}
 	
 	public String a4StatusUpdate(String check, String value) {    //  아두이노에서 A4 상태 업데이트
 		if(dbc.arduinoCheck(check)) {    //  아두이노 접근이 맞는지 확인
 			try {
-				sql = "update iot set A4=?";    //  A4 상태 업데이트 시키는 쿼리문
+				sql = "update iot set a4_weight=?";    //  A4 상태 업데이트 시키는 쿼리문
 				pstmt = conn.prepareStatement(sql);    //  db에 접근하기 위한 쿼리 저장
 				pstmt.setString(1, dbc.decryptoString(value));    //  sql문에 ?를 복호화된 st로 변환
 				pstmt.executeUpdate();    //  db에 쿼리문 날리기
@@ -45,43 +59,59 @@ public class A4Status {
 		return returns;
 	}
 	
-	public String a4StatusCheck(String check) {    //  안드로이드에서 A4 상태 확인
-		if(check.equals("serucity")) {    //  안드로이드 접근이 맞는지 확인
-			try {
-				sql = "select A4 from iot";    //  A4 상태 체크하는 쿼리문
-				pstmt = conn.prepareStatement(sql);    //  db에 접근하기 위한 쿼리 저장
-				rs = pstmt.executeQuery();    //  db에 쿼리문 날리기
-				//  db에서 쿼리문 날리고 얻은 결과값 가져오기
-				if(rs.next()) {    //  결과값 있으면 결과값 return
-					String value;
-					value = rs.getString("A4");
-					if(value.equals("1")) {
-						returns = "enough";
-					} else if(value.equals("0")) {
-						returns = "lack";
-					}
-				}
-				else {    //  결과값 없으면 no return
-					returns = "no";
-				}
-			} catch (SQLException e) {    //  예외 처리
-				System.err.println("A4Status Check SQLException error");
-				returns = "SQLError";
-			} finally {    //  db접속이 끝나면 초기화 및 닫아주기
+	public String a4StatusCheck(String check, String key) {    //  안드로이드에서 A4 상태 확인
+		try {
+			if("security".equals(AESDec.aesDecryption(check, crypto.decrypto(key)))) {    //  안드로이드 접근이 맞는지 확인
 				try {
-					if(rs != null) {
-						rs.close();
+					sql = "select a4_weight from iot";    //  A4 상태 체크하는 쿼리문
+					pstmt = conn.prepareStatement(sql);    //  db에 접근하기 위한 쿼리 저장
+					rs = pstmt.executeQuery();    //  db에 쿼리문 날리기
+					//  db에서 쿼리문 날리고 얻은 결과값 가져오기
+					if(rs.next()) {    //  결과값 있으면 결과값 return
+						String value;
+						value = rs.getString("a4_weight");
+						if(value.equals("1")) {
+							returns = "A4enough";
+						} else if(value.equals("0")) {
+							returns = "A4lack";
+						}
 					}
-					if(pstmt != null) {
-						pstmt.close();
+					else {    //  결과값 없으면 no return
+						returns = "no";
 					}
-				} catch (SQLException e) {
-					System.err.println("A4Status Check close SQLException error");
+				} catch (SQLException e) {    //  예외 처리
+					System.err.println("A4Status Check SQLException error");
+					returns = "SQLError";
+				} finally {    //  db접속이 끝나면 초기화 및 닫아주기
+					try {
+						if(rs != null) {
+							rs.close();
+						}
+						if(pstmt != null) {
+							pstmt.close();
+						}
+					} catch (SQLException e) {
+						System.err.println("A4Status Check close SQLException error");
+					}
 				}
 			}
-		}
-		else {    //  안드로이드 접근이 아닐 결우 noAndroid return
-			returns = "noAndroid";
+			else {    //  안드로이드 접근이 아닐 결우 noAndroid return
+				returns = "noAndroid";
+			}
+		} catch (InvalidKeyException e) {
+			System.err.println("A4Status Check InvalidKeyException error");
+		} catch (UnsupportedEncodingException e) {
+			System.err.println("A4Status Check UnsupportedEncodingException error");
+		} catch (NoSuchPaddingException e) {
+			System.err.println("A4Status Check NoSuchPaddingException error");
+		} catch (NoSuchAlgorithmException e) {
+			System.err.println("A4Status Check NoSuchAlgorithmException error");
+		} catch (InvalidAlgorithmParameterException e) {
+			System.err.println("A4Status Check InvalidAlgorithmParameterException error");
+		} catch (BadPaddingException e) {
+			System.err.println("A4Status Check BadPaddingException error");
+		} catch (IllegalBlockSizeException e) {
+			System.err.println("A4Status Check IllegalBlockSizeException error");
 		}
 		return returns;
 	}

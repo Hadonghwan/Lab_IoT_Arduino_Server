@@ -46,7 +46,7 @@ public class LightStatus {
 	}
 	
 	public String lightStatusCheck(String check) {    //  안드로이드에서 불 상태 확인
-		if(check.equals("serucity")) {    //  안드로이드 접근이 맞는지 확인
+		if(check.equals("security")) {    //  안드로이드 접근이 맞는지 확인
 			try {
 				sql = "select light from iot";    //  light 상태 체크하는 쿼리문
 				pstmt = conn.prepareStatement(sql);    //  db에 접근하기 위한 쿼리 저장
